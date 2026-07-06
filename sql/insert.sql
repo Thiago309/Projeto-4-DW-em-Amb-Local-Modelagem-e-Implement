@@ -168,17 +168,17 @@ INSERT INTO Fato_Compras_Insumos (FK_Tempo, FK_Fornecedor, FK_Materia_Prima, Qua
 (20260610, 3, 3, 3000.0000, 0.4200, 1260.00, 3, 0, TRUE);
 
 -- Fato_Estoque_Snapshot (10 Registros)
-INSERT INTO Fato_Estoque_Snapshot (FK_Tempo, FK_Produto, FK_Materia_Prima, Quantidade_Saldo, Custo_Unitario_Estoque, Valor_Saldo_Estoque, Tipo_Item, Localizacao_Armazem, Dias_Sem_Movimentacao) VALUES
-(20260601, 1, NULL, 50.0000, 900.0000, 45000.00, 'Produto Acabado', 'Armazém Central - Setor Usinagem', 2),
-(20260601, NULL, 1, 4500.0000, 8.5000, 38250.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 0),
-(20260602, 2, NULL, 35.0000, 520.0000, 18200.00, 'Produto Acabado', 'Armazém Central - Setor Usinagem', 5),
-(20260602, NULL, 2, 1200.0000, 4.2000, 5040.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 1),
-(20260603, 3, NULL, 8.0000, 5400.0000, 43200.00, 'Produto Acabado', 'Almoxarifado Norte - Setor Metalúrgico', 10),
-(20260603, NULL, 3, 15000.0000, 0.4500, 6750.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 15),
-(20260604, 4, NULL, 220.0000, 65.0000, 14300.00, 'Produto Acabado', 'Galpão Industrial 2 (WIP)', 0),
-(20260605, NULL, 4, 340.0000, 12.0000, 4080.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 3),
-(20260608, 10, NULL, 5.0000, 3100.0000, 15500.00, 'Produto Acabado', 'Doca de Expedição Sul', 8),
-(20260610, NULL, 5, 800.0000, 14.5000, 11600.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 4);
+INSERT INTO Fato_Estoque_Snapshot (SK_Estoque_Snapshot, FK_Tempo, FK_Produto, FK_Materia_Prima, Quantidade_Saldo, Custo_Unitario_Estoque, Valor_Saldo_Estoque, Tipo_Item, Localizacao_Armazem, Dias_Sem_Movimentacao) VALUES
+(1, 20260601, 1, NULL, 50.0000, 900.0000, 45000.00, 'Produto Acabado', 'Armazém Central - Setor Usinagem', 2),
+(2, 20260601, NULL, 1, 4500.0000, 8.5000, 38250.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 0),
+(3, 20260602, 2, NULL, 35.0000, 520.0000, 18200.00, 'Produto Acabado', 'Armazém Central - Setor Usinagem', 5),
+(4, 20260602, NULL, 2, 1200.0000, 4.2000, 5040.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 1),
+(5, 20260603, 3, NULL, 8.0000, 5400.0000, 43200.00, 'Produto Acabado', 'Almoxarifado Norte - Setor Metalúrgico', 10),
+(6, 20260603, NULL, 3, 15000.0000, 0.4500, 6750.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 15),
+(7, 20260604, 4, NULL, 220.0000, 65.0000, 14300.00, 'Produto Acabado', 'Galpão Industrial 2 (WIP)', 0),
+(8, 20260605, NULL, 4, 340.0000, 12.0000, 4080.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 3),
+(9, 20260608, 10, NULL, 5.0000, 3100.0000, 15500.00, 'Produto Acabado', 'Doca de Expedição Sul', 8),
+(10, 20260610, NULL, 5, 800.0000, 14.5000, 11600.00, 'Matéria-Prima', 'Almoxarifado de Insumos', 4);
 
 -- Fato_Manutencao (10 Registros)
 INSERT INTO Fato_Manutencao (FK_Tempo_Inicio, FK_Equipamento, FK_Tipo_Manutencao, FK_Fornecedor, Numero_Ordem_Servico, Tempo_Reparo_Horas, Tempo_Inatividade_Horas, Custo_Pecas_Substituidas, Custo_Mao_Obra, Custo_Total_Manutencao, Descricao_Reparo) VALUES
@@ -212,6 +212,11 @@ ON CONFLICT (SK_Financeiro) DO NOTHING;
 -- =========================================================================
 -- 3. ALINHAMENTO/SINCRONIZAÇÃO DAS SEQUÊNCIAS DAS SURROGATE KEYS (SERIAL)
 -- =========================================================================
+-- Como informamos IDs fixos nas colunas SERIAL primárias, precisamos
+-- atualizar o valor atual do gerador de sequência do PostgreSQL para o valor
+-- máximo inserido. Se não fizermos isso, inserções futuras geradas pelo banco
+-- tentarão reutilizar IDs como 1, 2, 3... e falharão com "Duplicate Key".
+
 SELECT setval(pg_get_serial_sequence('dim_regiao', 'sk_regiao'), COALESCE(max(SK_Regiao), 1)) FROM Dim_Regiao;
 SELECT setval(pg_get_serial_sequence('dim_produto', 'sk_produto'), COALESCE(max(SK_Produto), 1)) FROM Dim_Produto;
 SELECT setval(pg_get_serial_sequence('dim_materia_prima', 'sk_materia_prima'), COALESCE(max(SK_Materia_Prima), 1)) FROM Dim_Materia_Prima;
@@ -221,3 +226,4 @@ SELECT setval(pg_get_serial_sequence('dim_equipamento_processo', 'sk_equipamento
 SELECT setval(pg_get_serial_sequence('dim_canal_vendas', 'sk_canal'), COALESCE(max(SK_Canal), 1)) FROM Dim_Canal_Vendas;
 SELECT setval(pg_get_serial_sequence('dim_tipo_manutencao', 'sk_tipo_manutencao'), COALESCE(max(SK_Tipo_Manutencao), 1)) FROM Dim_Tipo_Manutencao;
 SELECT setval(pg_get_serial_sequence('fato_financeiro', 'sk_financeiro'), COALESCE(max(SK_Financeiro), 1)) FROM Fato_Financeiro;
+SELECT setval(pg_get_serial_sequence('fato_estoque_snapshot', 'sk_estoque_snapshot'), COALESCE(max(SK_Estoque_Snapshot), 1)) FROM Fato_Estoque_Snapshot;

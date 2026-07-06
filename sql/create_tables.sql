@@ -191,6 +191,7 @@ CREATE TABLE Fato_Compras_Insumos (
 
 -- Fato_Estoque_Snapshot
 CREATE TABLE Fato_Estoque_Snapshot (
+    SK_Estoque_Snapshot SERIAL PRIMARY KEY,
     FK_Tempo INT NOT NULL,
     FK_Produto INT, -- NULL se for Matéria-Prima pura
     FK_Materia_Prima INT, -- NULL se for Produto Acabado
@@ -201,8 +202,6 @@ CREATE TABLE Fato_Estoque_Snapshot (
     Localizacao_Armazem VARCHAR(100) NOT NULL,
     Dias_Sem_Movimentacao INT NOT NULL,
     
-    -- Chave composta garantindo apenas um snapshot do item por dia
-    PRIMARY KEY (FK_Tempo, FK_Produto, FK_Materia_Prima),
     CONSTRAINT fk_est_tempo FOREIGN KEY (FK_Tempo) REFERENCES Dim_Tempo (SK_Tempo) ON DELETE RESTRICT,
     CONSTRAINT fk_est_produto FOREIGN KEY (FK_Produto) REFERENCES Dim_Produto (SK_Produto) ON DELETE RESTRICT,
     CONSTRAINT fk_est_mp FOREIGN KEY (FK_Materia_Prima) REFERENCES Dim_Materia_Prima (SK_Materia_Prima) ON DELETE RESTRICT
