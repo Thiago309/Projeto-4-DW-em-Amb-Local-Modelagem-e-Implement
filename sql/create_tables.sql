@@ -42,10 +42,6 @@ CREATE TABLE Dim_Tempo (
     Dia INT NOT NULL,
     Mes INT NOT NULL,
     Ano INT NOT NULL,
-    Trimestre INT NOT NULL,
-    Semestre INT NOT NULL,
-    Dia_Semana VARCHAR(20) NOT NULL,
-    Nome_Mes VARCHAR(20) NOT NULL,
     Flag_Fim_Semana BOOLEAN NOT NULL
 );
 

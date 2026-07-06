@@ -22,17 +22,17 @@ INSERT INTO Dim_Regiao (SK_Regiao, Cidade, Estado, Pais, Macroregiao) VALUES
 ON CONFLICT (SK_Regiao) DO NOTHING;
 
 -- Dim_Tempo (10 Registros)
-INSERT INTO Dim_Tempo (SK_Tempo, Data, Dia, Mes, Ano, Trimestre, Semestre, Dia_Semana, Nome_Mes, Flag_Fim_Semana) VALUES
-(20260601, '2026-06-01', 1, 6, 2026, 2, 1, 'Segunda-feira', 'Junho', FALSE),
-(20260602, '2026-06-02', 2, 6, 2026, 2, 1, 'Terça-feira', 'Junho', FALSE),
-(20260603, '2026-06-03', 3, 6, 2026, 2, 1, 'Quarta-feira', 'Junho', FALSE),
-(20260604, '2026-06-04', 4, 6, 2026, 2, 1, 'Quinta-feira', 'Junho', FALSE),
-(20260605, '2026-06-05', 5, 6, 2026, 2, 1, 'Sexta-feira', 'Junho', FALSE),
-(20260606, '2026-06-06', 6, 6, 2026, 2, 1, 'Sábado', 'Junho', TRUE),
-(20260607, '2026-06-07', 7, 6, 2026, 2, 1, 'Domingo', 'Junho', TRUE),
-(20260608, '2026-06-08', 8, 6, 2026, 2, 1, 'Segunda-feira', 'Junho', FALSE),
-(20260609, '2026-06-09', 9, 6, 2026, 2, 1, 'Terça-feira', 'Junho', FALSE),
-(20260610, '2026-06-10', 10, 6, 2026, 2, 1, 'Quarta-feira', 'Junho', FALSE)
+INSERT INTO Dim_Tempo (SK_Tempo, Data, Dia, Mes, Ano, Flag_Fim_Semana) VALUES
+(20260601, '2026-06-01', 1, 6, 2026, FALSE),
+(20260602, '2026-06-02', 2, 6, 2026, FALSE),
+(20260603, '2026-06-03', 3, 6, 2026, FALSE),
+(20260604, '2026-06-04', 4, 6, 2026, FALSE),
+(20260605, '2026-06-05', 5, 6, 2026, FALSE),
+(20260606, '2026-06-06', 6, 6, 2026, TRUE),
+(20260607, '2026-06-07', 7, 6, 2026, TRUE),
+(20260608, '2026-06-08', 8, 6, 2026, FALSE),
+(20260609, '2026-06-09', 9, 6, 2026, FALSE),
+(20260610, '2026-06-10', 10, 6, 2026, FALSE)
 ON CONFLICT (SK_Tempo) DO NOTHING;
 
 -- Dim_Produto (10 Registros - Contém erros)
