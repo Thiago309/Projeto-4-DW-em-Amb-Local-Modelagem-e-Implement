@@ -21,19 +21,41 @@ INSERT INTO Dim_Regiao (SK_Regiao, Cidade, Estado, Pais, Macroregiao) VALUES
 (10, 'Chicago', 'IL', 'Estados Unidos', 'North America')
 ON CONFLICT (SK_Regiao) DO NOTHING;
 
--- Dim_Tempo (10 Registros)
-INSERT INTO Dim_Tempo (SK_Tempo, Data, Dia, Mes, Ano, Flag_Fim_Semana) VALUES
-(20260601, '2026-06-01', 1, 6, 2026, FALSE),
-(20260602, '2026-06-02', 2, 6, 2026, FALSE),
-(20260603, '2026-06-03', 3, 6, 2026, FALSE),
-(20260604, '2026-06-04', 4, 6, 2026, FALSE),
-(20260605, '2026-06-05', 5, 6, 2026, FALSE),
-(20260606, '2026-06-06', 6, 6, 2026, TRUE),
-(20260607, '2026-06-07', 7, 6, 2026, TRUE),
-(20260608, '2026-06-08', 8, 6, 2026, FALSE),
-(20260609, '2026-06-09', 9, 6, 2026, FALSE),
-(20260610, '2026-06-10', 10, 6, 2026, FALSE)
-ON CONFLICT (SK_Tempo) DO NOTHING;
+-- Dim_Tempo (Geração dinâmica via Procedure de 01/06/2026 a 10/06/2026)
+CREATE OR REPLACE PROCEDURE public.sp_popula_dim_tempo_temp()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_data_atual DATE := '2026-06-01';
+    v_data_final DATE := '2026-06-10';
+    v_sk_tempo INT;
+    v_fim_semana BOOLEAN;
+BEGIN
+    WHILE v_data_atual <= v_data_final LOOP
+        v_sk_tempo := (EXTRACT(YEAR FROM v_data_atual) * 10000) + 
+                      (EXTRACT(MONTH FROM v_data_atual) * 100) + 
+                      EXTRACT(DAY FROM v_data_atual);
+                      
+        v_fim_semana := EXTRACT(ISODOW FROM v_data_atual) IN (6, 7);
+
+        INSERT INTO Dim_Tempo (SK_Tempo, Data, Dia, Mes, Ano, Flag_Fim_Semana)
+        VALUES (
+            v_sk_tempo,
+            v_data_atual,
+            EXTRACT(DAY FROM v_data_atual),
+            EXTRACT(MONTH FROM v_data_atual),
+            EXTRACT(YEAR FROM v_data_atual),
+            v_fim_semana
+        )
+        ON CONFLICT (SK_Tempo) DO NOTHING;
+        
+        v_data_atual := v_data_atual + INTERVAL '1 day';
+    END LOOP;
+END;
+$$;
+
+CALL public.sp_popula_dim_tempo_temp();
+DROP PROCEDURE public.sp_popula_dim_tempo_temp();
 
 -- Dim_Produto (10 Registros - Contém erros)
 INSERT INTO Dim_Produto (SK_Produto, NK_Produto, Nome_Produto, Descricao, Categoria, Subcategoria, Unidade_Medida, Preco_Sugerido, Custo_Padrao) VALUES
