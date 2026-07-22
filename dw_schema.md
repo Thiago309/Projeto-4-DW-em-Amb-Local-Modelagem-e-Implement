@@ -49,11 +49,8 @@ Tabela contendo os atributos temporais para análise de períodos.
 *   **Dia** (INT): Dia do mês (1 a 31).
 *   **Mes** (INT): Mês numérico (1 a 12).
 *   **Ano** (INT): Ano correspondente.
-*   **Trimestre** (INT): Trimestre fiscal (1 a 4).
-*   **Semestre** (INT): Semestre fiscal (1 a 2).
-*   **Dia_Semana** (VARCHAR(20)): Nome do dia da semana (ex: 'Segunda-feira').
-*   **Nome_Mes** (VARCHAR(20)): Nome do mês (ex: 'Junho').
 *   **Flag_Fim_Semana** (BOOLEAN): Verdadeiro se for sábado ou domingo.
+
 
 ### Dim_Produto
 Tabela que armazena os dados dos produtos acabados fabricados pela empresa.

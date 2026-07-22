@@ -14,6 +14,11 @@ Implementamos com sucesso a infraestrutura do Data Warehouse local utilizando Do
    - Criação física de **6 tabelas fato** (`Fato_Producao`, `Fato_Vendas`, `Fato_Compras_Insumos`, `Fato_Estoque_Snapshot`, `Fato_Manutencao`, `Fato_Financeiro`).
    - Definições estritas de Primary Keys (PKs), Foreign Keys (FKs) e restrições de integridade.
 
+3. **Carga de Dados e Stored Procedures (`sql/insert.sql` & `sql/procedure.sql`)**
+   - Correção estrutural das stored procedures de geração automática de datas da dimensão de tempo.
+   - Substituição de inserções manuais estáticas por uma procedure dinâmica temporária (`sp_popula_dim_tempo_temp`) para carregar a dimensão de tempo com lógica matemática de geração de SKs e cálculo automatizado de finais de semana.
+   - Otimização do gerador aleatório de vendas para respeitar a integridade referencial herdando a região geográfica do cliente.
+
 ## Como foi verificado
 
 Rodamos a validação de criação física das tabelas dentro do container PostgreSQL com o comando `\dt`. O banco de dados retornou todas as 15 tabelas criadas no schema `public` sob propriedade do usuário administrador:
@@ -36,7 +41,7 @@ Rodamos a validação de criação física das tabelas dentro do container Postg
  public | fato_manutencao          | table | alfamaq_admin
  public | fato_producao            | table | alfamaq_admin
  public | fato_vendas              | table | alfamaq_admin
-(15 rows)
+ (15 rows)
 ```
 
 ## Como Conectar ao Banco de Dados
