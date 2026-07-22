@@ -21,42 +21,6 @@ INSERT INTO Dim_Regiao (SK_Regiao, Cidade, Estado, Pais, Macroregiao) VALUES
 (10, 'Chicago', 'IL', 'Estados Unidos', 'North America')
 ON CONFLICT (SK_Regiao) DO NOTHING;
 
--- Dim_Tempo (Geração dinâmica via Procedure de 01/06/2026 a 10/06/2026)
-CREATE OR REPLACE PROCEDURE public.sp_popula_dim_tempo_temp()
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    v_data_atual DATE := '2026-06-01';
-    v_data_final DATE := '2026-06-10';
-    v_sk_tempo INT;
-    v_fim_semana BOOLEAN;
-BEGIN
-    WHILE v_data_atual <= v_data_final LOOP
-        v_sk_tempo := (EXTRACT(YEAR FROM v_data_atual) * 10000) + 
-                      (EXTRACT(MONTH FROM v_data_atual) * 100) + 
-                      EXTRACT(DAY FROM v_data_atual);
-                      
-        v_fim_semana := EXTRACT(ISODOW FROM v_data_atual) IN (6, 7);
-
-        INSERT INTO Dim_Tempo (SK_Tempo, Data, Dia, Mes, Ano, Flag_Fim_Semana)
-        VALUES (
-            v_sk_tempo,
-            v_data_atual,
-            EXTRACT(DAY FROM v_data_atual),
-            EXTRACT(MONTH FROM v_data_atual),
-            EXTRACT(YEAR FROM v_data_atual),
-            v_fim_semana
-        )
-        ON CONFLICT (SK_Tempo) DO NOTHING;
-        
-        v_data_atual := v_data_atual + INTERVAL '1 day';
-    END LOOP;
-END;
-$$;
-
-CALL public.sp_popula_dim_tempo_temp();
-DROP PROCEDURE public.sp_popula_dim_tempo_temp();
-
 -- Dim_Produto (10 Registros - Contém erros)
 INSERT INTO Dim_Produto (SK_Produto, NK_Produto, Nome_Produto, Descricao, Categoria, Subcategoria, Unidade_Medida, Preco_Sugerido, Custo_Padrao) VALUES
 (1, 'PROD_01', 'Motor Elétrico Trifásico 5HP', 'Motor de alta performance para prensa', 'Motores', 'Trifásicos', 'Unidade', 1500.00, 900.00),
@@ -229,6 +193,84 @@ INSERT INTO Fato_Financeiro (SK_Financeiro, FK_Tempo, FK_Fornecedor, Tipo_Lancam
 (9, 20260610, NULL, 'Receita', 'Comercial', 17800.00),
 (10, 20260610, 5, 'Despesa Operacional', 'Industrial', -2800.00)
 ON CONFLICT (SK_Financeiro) DO NOTHING;
+
+
+-- Dim_Tempo (Geração dinâmica via Procedure de 01/06/2026 a 10/06/2026)
+CREATE OR REPLACE PROCEDURE public.sp_dim_tempo()
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_data_atual DATE := '2026-06-01';
+    v_data_final DATE := '2026-06-10';
+    v_sk_tempo INT;
+    v_fim_semana BOOLEAN;
+BEGIN
+    WHILE v_data_atual <= v_data_final LOOP
+        v_sk_tempo := (EXTRACT(YEAR FROM v_data_atual) * 10000) + 
+                      (EXTRACT(MONTH FROM v_data_atual) * 100) + 
+                      EXTRACT(DAY FROM v_data_atual);
+                      
+        v_fim_semana := EXTRACT(ISODOW FROM v_data_atual) IN (6, 7);
+
+        INSERT INTO Dim_Tempo (SK_Tempo, Data, Dia, Mes, Ano, Flag_Fim_Semana)
+        VALUES (
+            v_sk_tempo,
+            v_data_atual,
+            EXTRACT(DAY FROM v_data_atual),
+            EXTRACT(MONTH FROM v_data_atual),
+            EXTRACT(YEAR FROM v_data_atual),
+            v_fim_semana
+        )
+        ON CONFLICT (SK_Tempo) DO NOTHING;
+        
+        v_data_atual := v_data_atual + INTERVAL '1 day';
+    END LOOP;
+END;
+$$;
+
+CALL public.sp_dim_tempo();
+
+DROP PROCEDURE public.sp_dim_tempo();
+
+
+CREATE OR REPLACE PROCEDURE public.sp_carga_tabela_fato_producao()
+LANGUAGE plpgsql
+AS $$   
+DECLARE
+    i INT := 1;
+    v_fk_tempo INT;
+    v_fk_produto INT;
+    v_fk_equipamento INT;
+   
+BEGIN
+    WHILE i <= 15 LOOP
+        -- Seleciona valores aleatórios válidos das tabelas de fato produção.
+        v_fk_tempo := (SELECT sk_tempo FROM dim_tempo ORDER BY RANDOM() LIMIT 1);
+        v_fk_produto := (SELECT sk_produto FROM dim_produto ORDER BY RANDOM() LIMIT 1);
+        v_fk_equipamento := (SELECT sk_equipamento FROM dim_equipamento_processo ORDER BY RANDOM() LIMIT 1);
+
+        BEGIN
+            -- Tenta inserir um registro com uma combinação núnica de chaves
+            INSERT INTO public.fato_producao (FK_Tempo_Inicio, FK_Produto, FK_Equipamento, Quantidade_Produzida, Quantidade_Aprovada, Quantidade_Defeituosa, Tempo_Producao_Minutos, Tempo_Inatividade_Minutos, Custo_Producao_Total, Descricao_Producao)
+            VALUES (
+                    v_fk_tempo, 
+                    v_fk_produto, 
+                    v_fk_equipamento,
+                    FLOOR(1 + RANDOM() * 15), -- Quantidade
+                    ROUND(CAST(RANDOM() * 1000 AS numeric), 2) -- Valor: Aleatório até 1000 com duas casas decimais
+            );
+            i := i + 1;
+        EXCEPTION WHEN unique_violation THEN
+            CONTINUE;
+        END;
+    END LOOP;    
+END;
+$$;
+
+-- Executa a SP
+CALL public.sp_carga_tabela_fato_producao();
+
+DROP PROCEDURE public.sp_carga_tabela_fato_producao();
 
 
 -- =========================================================================
