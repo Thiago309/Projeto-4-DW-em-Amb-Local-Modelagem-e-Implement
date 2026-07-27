@@ -50,8 +50,3 @@ VALUES (12, 4, 5, 4, 9, 134.00);
 
 -- Relatório
 SELECT * FROM dw.vw_vendasporprodutocanal WHERE nome_produto IN ('Suco', 'Suco Light');
-
-
-
-
-

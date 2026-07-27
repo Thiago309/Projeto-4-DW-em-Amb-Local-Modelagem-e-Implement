@@ -117,6 +117,3 @@ SELECT * FROM dw.RelatorioVendasPorCliente();
 SELECT * FROM dw.RelatorioVendasPorCliente('João Silva');
 SELECT * FROM dw.RelatorioVendasPorCliente('João Silva', 2024);
 SELECT * FROM dw.RelatorioVendasPorCliente(NULL, 2024);
-
-
-

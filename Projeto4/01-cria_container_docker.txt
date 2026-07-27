@@ -13,4 +13,3 @@ docker run --name dsadw -p 5431:5432 -e POSTGRES_DB=dsadb -e POSTGRES_USER=dsaad
 
 Obs: Quando acessar o pgAdmin pela primeira vez crie uma senha master, por exemplo: dsa1010
 
- 

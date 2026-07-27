@@ -23,12 +23,3 @@ WHERE id_canal = 109;
 
 -- Seleciona os dados
 SELECT * FROM dw.dim_canal;
-
-
-
-
-
-
-
-
-

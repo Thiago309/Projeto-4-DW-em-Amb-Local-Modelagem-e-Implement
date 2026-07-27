@@ -51,4 +51,3 @@ CREATE TABLE dw.fato_venda (
   FOREIGN KEY (sk_canal) REFERENCES dw.dim_canal (sk_canal),
   FOREIGN KEY (sk_data) REFERENCES dw.dim_data (sk_data)
 );
-

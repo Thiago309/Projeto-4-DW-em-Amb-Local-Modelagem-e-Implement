@@ -13,7 +13,7 @@ Este plano visa estruturar o ambiente local do Data Warehouse para a **AlfaMaq M
 
 ### Infraestrutura Docker
 
-#### [MODIFY] [docker-compose.yml](file:///c:/Users/karer/OneDrive/Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/docker-compose.yml)
+#### [MODIFY] [docker-compose.yml](/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/docker-compose.yml)
 - Configuração do Docker Compose contendo o serviço `postgres`.
 - Volume mapeado para persistência local dos dados (`pgdata`).
 - Mapeamento da pasta SQL local (`./sql`) para a pasta de inicialização do container (`/docker-entrypoint-initdb.d`), executando automaticamente nossos scripts de criação de tabelas na primeira inicialização.
@@ -22,16 +22,16 @@ Este plano visa estruturar o ambiente local do Data Warehouse para a **AlfaMaq M
 
 ### Estrutura do Banco de Dados (DDL e Scripts SQL)
 
-#### [MODIFY] [create_tables.sql](file:///c:/Users/karer/OneDrive/Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/sql/create_tables.sql)
+#### [MODIFY] [create_tables.sql](Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/sql/create_tables.sql)
 - Criação das tabelas de dimensão: `Dim_Regiao`, `Dim_Tempo`, `Dim_Produto`, `Dim_Materia_Prima`, `Dim_Cliente`, `Dim_Fornecedor`, `Dim_Equipamento_Processo`, `Dim_Canal_Vendas`, `Dim_Tipo_Manutencao`.
 - Criação das tabelas fato: `Fato_Producao`, `Fato_Vendas`, `Fato_Compras_Insumos`, `Fato_Estoque_Snapshot`, `Fato_Manutencao`, `Fato_Financeiro`.
 - Definição de chaves primárias, estrangeiras e restrições de integridade.
 
-#### [MODIFY] [insert.sql](file:///c:/Users/karer/OneDrive/Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/sql/insert.sql)
+#### [MODIFY] [insert.sql](Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/sql/insert.sql)
 - Scripts de carga estática de teste simulando dados sujos (dirty data) para validar o comportamento de ETL.
 - Geração dinâmica da dimensão de tempo `Dim_Tempo` via stored procedure temporária de apoio.
 
-#### [MODIFY] [procedure.sql](file:///c:/Users/karer/OneDrive/Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/sql/procedure.sql)
+#### [MODIFY] [procedure.sql](Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/sql/procedure.sql)
 - Implementação das stored procedures de carga e população das tabelas de dimensões e fatos com regras matemáticas de negócio corretas.
 
 ---

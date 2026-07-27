@@ -26,5 +26,3 @@ CREATE INDEX idx_fato_venda_produto_data ON dw.fato_venda(sk_produto, sk_data);
 -- Índices nas dimensões Produto e Data
 CREATE INDEX idx_dim_produto_categoria ON dw.dim_produto(categoria);
 CREATE INDEX idx_dim_data_ano ON dw.dim_data(ano);
-
-
