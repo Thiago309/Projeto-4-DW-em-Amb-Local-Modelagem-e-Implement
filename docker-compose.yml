@@ -1,7 +1,7 @@
 services:
-  postgres-dw:
+  postgres-fonte:
     image: postgres:18-alpine
-    container_name: alfamaq_postgres_dw
+    container_name: alfamaq_postgres_fonte
     restart: always
     environment:
       POSTGRES_DB: alfamaq_dw
@@ -11,7 +11,22 @@ services:
       - "5432:5432"
     volumes:
       - ./Projeto4/02-modelo-fisico-projeto1.sql:/docker-entrypoint-initdb.d/02-modelo-fisico-projeto1.sql
-      - pgdata:/var/lib/postgresql
+      - pgdata_fonte:/var/lib/postgresql
+    networks:
+      - dw-network
+
+  postgres-destino:
+    image: postgres:18-alpine
+    container_name: alfamaq_postgres_destino
+    restart: always
+    environment:
+      POSTGRES_DB: alfamaq_staging
+      POSTGRES_USER: alfamaq_admin
+      POSTGRES_PASSWORD: alfamaq_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_destino:/var/lib/postgresql
     networks:
       - dw-network
 
@@ -20,5 +35,7 @@ networks:
     driver: bridge
 
 volumes:
-  pgdata:
+  pgdata_fonte:
+    driver: local
+  pgdata_destino:
     driver: local
