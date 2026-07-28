@@ -1,47 +1,62 @@
-# Plano de Implementação - Infraestrutura Local e DDL do Data Warehouse
+# Plano de Implementação - Infraestrutura Docker Multi-Banco e DW
 
-Este plano visa estruturar o ambiente local do Data Warehouse para a **AlfaMaq Manufatura S.A.** usando Docker Compose com PostgreSQL e criar os scripts DDL (Data Definition Language) correspondentes.
+Este plano visa estruturar o ambiente local do Data Warehouse para a AlfaMaq Manufatura S.A. utilizando o Docker Compose para gerar dois containers PostgreSQL (Origem/Fonte e Destino/Staging), permitindo a movimentação e transformação posterior de dados via Airbyte.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - Utilizaremos o **PostgreSQL 15+** como o SGBD padrão para o Data Warehouse devido ao seu suporte robusto a SQL, indexação e facilidade de deploy em Docker.
-> - O container exporá a porta `5432` no host. Caso você já possua um serviço de PostgreSQL rodando localmente na porta `5432`, precisaremos alterá-la no host (ex: para `5433`). Por favor, confirme se a porta `5432` está livre.
-> - As senhas e credenciais do banco serão expostas inicialmente em variáveis de ambiente padrão no `docker-compose.yml` para facilitar a execução local.
+> - Utilizaremos o **PostgreSQL 18-alpine** como padrão para os containers de banco de dados.
+> - O container de origem (`postgres-fonte`) expõe a porta `5432` no host local.
+> - O container de destino (`postgres-destino`) expõe a porta `5433` no host local para evitar qualquer conflito de portas no ambiente.
+> - As senhas, usuários e credenciais estão definidos diretamente no arquivo [docker-compose.yml](GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/docker-compose.yml).
 
 ## Proposed Changes
 
 ### Infraestrutura Docker
 
-#### [MODIFY] [docker-compose.yml](/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/docker-compose.yml)
-- Configuração do Docker Compose contendo o serviço `postgres`.
-- Volume mapeado para persistência local dos dados (`pgdata`).
-- Mapeamento da pasta SQL local (`./sql`) para a pasta de inicialização do container (`/docker-entrypoint-initdb.d`), executando automaticamente nossos scripts de criação de tabelas na primeira inicialização.
+#### [MODIFY] [docker-compose.yml](GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/docker-compose.yml)
+*   Configuração de rede bridge comum (`dw-network`) para os dois bancos.
+*   **postgres-fonte**:
+    *   Container Name: `alfamaq_postgres_fonte`
+    *   Porta: `5432:5432`
+    *   Banco de dados: `alfamaq_dw`
+    *   Volume persistente: `pgdata_fonte`
+    *   Script de inicialização montado: [02-modelo-fisico-projeto1.sql](GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/Projeto4/02-modelo-fisico-projeto1.sql) montado na pasta `/docker-entrypoint-initdb.d/` para criar a estrutura padrão de tabelas no banco de origem.
+*   **postgres-destino**:
+    *   Container Name: `alfamaq_postgres_destino`
+    *   Porta: `5433:5432`
+    *   Banco de dados: `alfamaq_staging` (área de staging inicial para cargas do Airbyte)
+    *   Volume persistente: `pgdata_destino`
 
 ---
 
-### Estrutura do Banco de Dados (DDL e Scripts SQL)
+### Estrutura do Banco de Dados (DDL)
 
-#### [MODIFY] [create_tables.sql](Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/sql/create_tables.sql)
-- Criação das tabelas de dimensão: `Dim_Regiao`, `Dim_Tempo`, `Dim_Produto`, `Dim_Materia_Prima`, `Dim_Cliente`, `Dim_Fornecedor`, `Dim_Equipamento_Processo`, `Dim_Canal_Vendas`, `Dim_Tipo_Manutencao`.
-- Criação das tabelas fato: `Fato_Producao`, `Fato_Vendas`, `Fato_Compras_Insumos`, `Fato_Estoque_Snapshot`, `Fato_Manutencao`, `Fato_Financeiro`.
-- Definição de chaves primárias, estrangeiras e restrições de integridade.
-
-#### [MODIFY] [insert.sql](Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/sql/insert.sql)
-- Scripts de carga estática de teste simulando dados sujos (dirty data) para validar o comportamento de ETL.
-- Geração dinâmica da dimensão de tempo `Dim_Tempo` via stored procedure temporária de apoio.
-
-#### [MODIFY] [procedure.sql](Documentos/GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/sql/procedure.sql)
-- Implementação das stored procedures de carga e população das tabelas de dimensões e fatos com regras matemáticas de negócio corretas.
+#### [MODIFY] [02-modelo-fisico-projeto1.sql](GitHub/Projeto-4-DW-em-Amb-Local-Modelagem-e-Implement/Projeto4/02-modelo-fisico-projeto1.sql)
+*   Garante a criação do schema `dw`.
+*   Criação das tabelas de dimensão: `dw.dim_produto`, `dw.dim_canal`, `dw.dim_data`, `dw.dim_cliente`.
+*   Criação da tabela fato: `dw.fato_venda`.
+*   Definição de chaves primárias e chaves estrangeiras garantindo a integridade referencial.
 
 ---
 
 ## Verification Plan
 
 ### Automated Tests
-- Validar se o arquivo `docker-compose.yml` está sintaticamente correto executando `docker-compose config`.
-- Inicializar o ambiente local executando `docker compose up -d --build`.
-- Verificar se as tabelas foram criadas com sucesso conectando ao container via `psql` e listando as tabelas (`\dt`).
+*   Validar a sintaxe do arquivo de composição executando:
+    ```bash
+    docker compose config
+    ```
+*   Subir o ambiente de banco local executando:
+    ```bash
+    docker compose up -d
+    ```
+*   Checar se os containers estão no status `Up` com o comando:
+    ```bash
+    docker compose ps
+    ```
 
 ### Manual Verification
-- O usuário poderá se conectar ao banco de dados usando ferramentas visuais como DBeaver ou pgAdmin utilizando as credenciais definidas.
+*   Utilizar um gerenciador de banco de dados (DBeaver, pgAdmin) para se conectar:
+    *   Na porta **5432** (Fonte - banco `alfamaq_dw`) e listar as tabelas no schema `dw` para garantir a criação da estrutura.
+    *   Na porta **5433** (Destino - banco `alfamaq_staging`) para validar o acesso da staging area.
