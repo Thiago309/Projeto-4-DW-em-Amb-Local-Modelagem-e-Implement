@@ -50,3 +50,28 @@ Implementamos com sucesso a nova infraestrutura multi-banco local utilizando o D
     *   **Porta:** `5433`
     *   **Database:** `alfamaq_staging`
     *   **Usuário / Senha:** `alfamaq_admin` / `alfamaq_pass`
+
+---
+
+## Instalação e Acesso ao Airbyte OSS
+
+A plataforma **Airbyte OSS** foi instalada e implantada com sucesso via Docker Compose em ambiente WSL2.
+
+*   **URL da Interface Web:** [http://localhost:8000](http://localhost:8000)
+*   **Usuário Padrão:** `airbyte`
+*   **Senha Padrão:** `password`
+*   **Serviços Ativos em Execução:**
+    *   `airbyte-proxy` (Portas `8000`, `8001`)
+    *   `airbyte-server`
+    *   `airbyte-webapp`
+    *   `airbyte-worker`
+    *   `airbyte-cron`
+    *   `airbyte-db` (PostgreSQL interno da Airbyte)
+    *   `airbyte-temporal` (Engine de orquestração de workflows)
+
+### Comandos de Controle do Airbyte
+No terminal WSL2, acesse o diretório `/home/dataengineer2025/airbyte`:
+*   **Verificar status dos contêineres:** `docker compose ps`
+*   **Verificar logs em tempo real:** `docker compose logs -f`
+*   **Parar o Airbyte:** `docker compose stop`
+*   **Reiniciar o Airbyte:** `docker compose start`
