@@ -1,4 +1,16 @@
+# =============================================================================
+# Data Warehouse Local - Alfamaq
+# Infraestrutura: PostgreSQL (Fonte + Staging)
+# Integração: Compatível com Airbyte (abctl) via host.docker.internal
+# =============================================================================
+
 services:
+
+  # ---------------------------------------------------------------------------
+  # Banco de Dados de ORIGEM / FONTE
+  # Contém o esquema dimensional do DW (Star Schema - Fato_Venda + Dims)
+  # Acesso pelo Airbyte: host.docker.internal:5432 | DB: alfamaq_dw
+  # ---------------------------------------------------------------------------
   postgres-fonte:
     image: postgres:18-alpine
     container_name: alfamaq_postgres_fonte
@@ -7,6 +19,13 @@ services:
       POSTGRES_DB: alfamaq_dw
       POSTGRES_USER: alfamaq_admin
       POSTGRES_PASSWORD: alfamaq_pass
+      # Habilita replicação lógica necessária para o Airbyte CDC (Change Data Capture)
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    command: >
+      postgres
+        -c wal_level=logical
+        -c max_replication_slots=4
+        -c max_wal_senders=4
     ports:
       - "5432:5432"
     volumes:
@@ -14,7 +33,17 @@ services:
       - pgdata_fonte:/var/lib/postgresql
     networks:
       - dw-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alfamaq_admin -d alfamaq_dw"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ---------------------------------------------------------------------------
+  # Banco de Dados de DESTINO / STAGING
+  # Destino das replicações do Airbyte
+  # Acesso pelo Airbyte: host.docker.internal:5433 | DB: alfamaq_staging
+  # ---------------------------------------------------------------------------
   postgres-destino:
     image: postgres:18-alpine
     container_name: alfamaq_postgres_destino
@@ -29,11 +58,23 @@ services:
       - pgdata_destino:/var/lib/postgresql
     networks:
       - dw-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alfamaq_admin -d alfamaq_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+# =============================================================================
+# Redes
+# =============================================================================
 networks:
   dw-network:
     driver: bridge
+    name: dw-network
 
+# =============================================================================
+# Volumes Persistentes
+# =============================================================================
 volumes:
   pgdata_fonte:
     driver: local
